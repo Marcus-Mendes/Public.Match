@@ -29,21 +29,21 @@ def load(path: Path, cdr3_col: str = None, source_name: str = None) -> pd.DataFr
     if source_name is None:
         source_name = path.stem
 
-    if cdr3_col:
+    # auto-detect first; fall back to the user-supplied hint only when needed
+    cdr3b_col = _find_col(df.columns, _CDR3B_ALIASES)
+    if cdr3b_col is None and cdr3_col:
         if cdr3_col not in df.columns:
             raise ValueError(
                 f"Column '{cdr3_col}' not found in {path.name}. "
                 f"Available columns: {list(df.columns)}"
             )
         cdr3b_col = cdr3_col
-    else:
-        cdr3b_col = _find_col(df.columns, _CDR3B_ALIASES)
-        if cdr3b_col is None:
-            raise ValueError(
-                f"Cannot find CDR3β column in {path.name}. "
-                f"Tried: {_CDR3B_ALIASES}. "
-                f"Use --custom-db-cdr3-col to specify the column name."
-            )
+    if cdr3b_col is None:
+        raise ValueError(
+            f"Cannot find CDR3β column in {path.name}. "
+            f"Tried: {_CDR3B_ALIASES}. "
+            f"Use --custom-db-cdr3-col to specify the column name."
+        )
 
     out = pd.DataFrame({
         "cdr3b":     df[cdr3b_col].astype(str).str.upper().str.strip(),
