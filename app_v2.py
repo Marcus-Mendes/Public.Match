@@ -128,10 +128,14 @@ section[data-testid="stVerticalBlock"] > div { gap: 0 !important; }
     text-align: center;
     border-bottom: 1px solid #e8edf2;
 }
-.pm-hero h1 {
-    font-size: 2.6rem; font-weight: 700;
-    color: #0b1f3a; margin: 0 0 0.6rem;
-    letter-spacing: -0.8px; line-height: 1.2;
+.pm-hero-brand {
+    font-size: 3.4rem; font-weight: 800; font-style: italic;
+    letter-spacing: -1.2px; line-height: 1; margin: 0 0 0.5rem;
+}
+.pm-hero-subtitle {
+    font-size: 1.5rem; font-weight: 600;
+    color: #0b1f3a; margin: 0 0 0.8rem;
+    letter-spacing: -0.4px; line-height: 1.3;
 }
 .pm-hero p {
     font-size: 1.05rem; color: #5a6a7e;
@@ -280,10 +284,13 @@ st.markdown(f"""
 
 st.markdown("""
 <div class="pm-hero">
-    <h1>Search Public TCR Databases</h1>
+    <h1 class="pm-hero-brand">
+        <span class="pm-brand-public">Public</span><span class="pm-brand-match">.Match</span>
+    </h1>
+    <h2 class="pm-hero-subtitle">Search Public TCR Databases</h2>
     <p>
         Match patient CDR3 sequences against IEDB, VDJdb, McPAS-TCR,
-        10x Genomics, MixTCRpred, BATCAVE, and NeoTCR in a single query.
+        10x Genomics, MixTCRpred, BATCAVE, NeoTCR, and CEDAR in a single query.
     </p>
     <div class="pm-dots">
         <div class="pm-dot" style="background:#f0912a"></div>
@@ -293,6 +300,7 @@ st.markdown("""
         <div class="pm-dot" style="background:#1e6ab0"></div>
         <div class="pm-dot" style="background:#2e9e5b"></div>
         <div class="pm-dot" style="background:#e84545"></div>
+        <div class="pm-dot" style="background:#c0772a"></div>
     </div>
 </div>
 """, unsafe_allow_html=True)
