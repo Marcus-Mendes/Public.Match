@@ -304,8 +304,13 @@ st.divider()
 
 st.subheader("Input sequences")
 
-# queries: dict[name, str] for beta/alpha  |  dict[name, tuple[str,str]] for paired
-queries: dict = {}
+# Clear persisted queries when chain mode changes
+if st.session_state.get("_last_chain") != chain:
+    st.session_state["queries"] = {}
+    st.session_state["_last_chain"] = chain
+
+def _save_queries(q: dict):
+    st.session_state["queries"] = q
 
 if chain == "beta":
     input_tab, example_tab = st.tabs(["📂  Upload / paste", "💡  Example"])
@@ -320,13 +325,13 @@ if chain == "beta":
             raw = st.text_area("CDR3β sequences (FASTA or one per line)", height=160,
                                placeholder=">cell_001\nCASSLAPGATNEKLFF")
         if raw.strip():
-            queries = parse_fasta(raw)
-            st.success(f"✓ {len(queries)} CDR3β sequence(s) loaded")
+            _save_queries(parse_fasta(raw))
+            st.success(f"✓ {len(st.session_state['queries'])} CDR3β sequence(s) loaded")
     with example_tab:
         st.code(EXAMPLE_BETA, language="text")
         if st.button("Load example"):
-            queries = parse_fasta(EXAMPLE_BETA)
-            st.success(f"✓ {len(queries)} example sequences loaded")
+            _save_queries(parse_fasta(EXAMPLE_BETA))
+            st.success(f"✓ {len(st.session_state['queries'])} example sequences loaded")
 
 elif chain == "alpha":
     input_tab, example_tab = st.tabs(["📂  Upload / paste", "💡  Example"])
@@ -341,13 +346,13 @@ elif chain == "alpha":
             raw = st.text_area("CDR3α sequences (FASTA or one per line)", height=160,
                                placeholder=">cell_001\nCAVSANSGTYKYIF")
         if raw.strip():
-            queries = parse_fasta(raw)
-            st.success(f"✓ {len(queries)} CDR3α sequence(s) loaded")
+            _save_queries(parse_fasta(raw))
+            st.success(f"✓ {len(st.session_state['queries'])} CDR3α sequence(s) loaded")
     with example_tab:
         st.code(EXAMPLE_ALPHA, language="text")
         if st.button("Load example"):
-            queries = parse_fasta(EXAMPLE_ALPHA)
-            st.success(f"✓ {len(queries)} example sequences loaded")
+            _save_queries(parse_fasta(EXAMPLE_ALPHA))
+            st.success(f"✓ {len(st.session_state['queries'])} example sequences loaded")
 
 else:  # paired
     tsv_tab, fasta_tab, example_tab = st.tabs(["📋  Upload TSV/CSV", "📂  Two FASTA files", "💡  Example"])
@@ -365,14 +370,16 @@ else:  # paired
                 st.error(f"Could not find CDR3β ({_CDR3B_ALIASES[:3]}…) or CDR3α ({_CDR3A_ALIASES[:3]}…) columns. "
                          f"Columns found: {list(df_in.columns)}")
             else:
+                parsed = {}
                 for i, row in df_in.iterrows():
                     seqb = str(row[b_col]).upper().strip()
                     seqa = str(row[a_col]).upper().strip()
                     if not seqb or seqb == "NAN" or not seqa or seqa == "NAN":
                         continue
                     name = str(row[n_col]) if n_col else f"seq_{i+1}"
-                    queries[name] = (seqa, seqb)
-                st.success(f"✓ {len(queries)} paired sequence(s) loaded from {tsv_file.name} "
+                    parsed[name] = (seqa, seqb)
+                _save_queries(parsed)
+                st.success(f"✓ {len(st.session_state['queries'])} paired sequence(s) loaded from {tsv_file.name} "
                            f"(β: `{b_col}`, α: `{a_col}`)")
 
     with fasta_tab:
@@ -391,8 +398,8 @@ else:  # paired
             if not common:
                 st.error("No matching sequence names between the two files.")
             else:
-                queries = {name: (alpha_seqs[name], beta_seqs[name]) for name in sorted(common)}
-                msg = f"✓ {len(queries)} paired sequence(s) matched by name."
+                _save_queries({name: (alpha_seqs[name], beta_seqs[name]) for name in sorted(common)})
+                msg = f"✓ {len(st.session_state['queries'])} paired sequence(s) matched by name."
                 if only_b:
                     msg += f" ({len(only_b)} β-only skipped)"
                 if only_a:
@@ -412,13 +419,15 @@ else:  # paired
             beta_seqs  = parse_fasta(EXAMPLE_PAIRED_BETA)
             alpha_seqs = parse_fasta(EXAMPLE_PAIRED_ALPHA)
             common = set(beta_seqs) & set(alpha_seqs)
-            queries = {name: (alpha_seqs[name], beta_seqs[name]) for name in sorted(common)}
-            st.success(f"✓ {len(queries)} example paired sequences loaded")
+            _save_queries({name: (alpha_seqs[name], beta_seqs[name]) for name in sorted(common)})
+            st.success(f"✓ {len(st.session_state['queries'])} example paired sequences loaded")
 
 st.divider()
 
 
 # ── Run ────────────────────────────────────────────────────────────────────────
+
+queries = st.session_state.get("queries", {})
 
 run_disabled = not queries or not selected_dbs
 st.button("▶  Run Public.Match", type="primary", disabled=run_disabled, key="run_btn")
