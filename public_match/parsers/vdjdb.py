@@ -3,10 +3,19 @@ from pathlib import Path
 import zipfile
 import io
 
-VDJDB_PATH = Path("Databases/VDJdb/VDJdb_05302026.zip")
+VDJDB_DIR = Path("Databases/VDJdb")
 
 
-def load(path: Path = VDJDB_PATH, min_score: int = 1) -> pd.DataFrame:
+def _find_zip(directory: Path) -> Path:
+    zips = sorted(directory.glob("VDJdb_*.zip"))
+    if not zips:
+        raise FileNotFoundError(f"No VDJdb_*.zip found in {directory}")
+    return zips[-1]
+
+
+def load(path: Path = None, min_score: int = 1) -> pd.DataFrame:
+    if path is None:
+        path = _find_zip(VDJDB_DIR)
     with zipfile.ZipFile(path) as z:
         tsv_name = next(n for n in z.namelist() if n.endswith(".tsv"))
         with z.open(tsv_name) as f:
