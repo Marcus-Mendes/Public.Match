@@ -1,6 +1,6 @@
 import pandas as pd
 from pathlib import Path
-from public_match.parsers import iedb, vdjdb, mcpas, tenx, mixtcrpred, batcave
+from public_match.parsers import iedb, vdjdb, mcpas, tenx, mixtcrpred, batcave, neotcr
 from public_match.parsers import custom as custom_parser
 
 _LOADERS = {
@@ -10,6 +10,7 @@ _LOADERS = {
     "tenx": tenx.load,
     "mixtcrpred": mixtcrpred.load,
     "batcave": batcave.load,
+    "neotcr": neotcr.load,
 }
 
 ALL_DBS = list(_LOADERS.keys())
