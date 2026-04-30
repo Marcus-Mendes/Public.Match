@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from public_match.parsers import iedb, vdjdb, mcpas, tenx, mixtcrpred, batcave
+from public_match.parsers import iedb, vdjdb, mcpas, tenx, mixtcrpred, batcave, neotcr
 
 _LOADERS = {
     "iedb": iedb.load,
@@ -10,6 +10,7 @@ _LOADERS = {
     "tenx": tenx.load,
     "mixtcrpred": mixtcrpred.load,
     "batcave": batcave.load,
+    "neotcr": neotcr.load,
 }
 
 ALL_DBS = list(_LOADERS.keys())
@@ -22,6 +23,7 @@ _SOURCE_LABELS = {
     "tenx": "10xDcode",
     "mixtcrpred": "MixTCRpred",
     "batcave": "BATCAVE",
+    "neotcr": "NeoTCR",
 }
 
 CACHE_PATH = Path("Databases/reference_cache.parquet")

@@ -162,6 +162,7 @@ DB_LABELS = {
     "tenx": "10x Genomics pMHC",
     "mixtcrpred": "MixTCRpred",
     "batcave": "BATCAVE",
+    "neotcr": "NeoTCR",
 }
 
 _SOURCE_LABELS = {
@@ -171,6 +172,7 @@ _SOURCE_LABELS = {
     "tenx": "10xDcode",
     "mixtcrpred": "MixTCRpred",
     "batcave": "BATCAVE",
+    "neotcr": "NeoTCR",
 }
 
 EXAMPLE_FASTA = (
@@ -273,7 +275,7 @@ st.markdown("""
         </div>
         <p style="color:#a8c4e0; margin:0; font-size:0.95rem; max-width:680px;">
             Match patient CDR3&beta; sequences against public TCR databases &mdash;
-            IEDB, VDJdb, McPAS-TCR, 10x Genomics, MixTCRpred, and BATCAVE &mdash; in a single query.
+            IEDB, VDJdb, McPAS-TCR, 10x Genomics, MixTCRpred, BATCAVE, and NeoTCR &mdash; in a single query.
         </p>
         <div style="display:flex; gap:6px; margin-top:0.9rem;">
             <span style="background:#f0912a; border-radius:3px; width:10px; height:10px; display:inline-block;"></span>
