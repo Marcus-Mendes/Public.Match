@@ -145,15 +145,15 @@ section[data-testid="stVerticalBlock"] > div { gap: 0 !important; }
 .pm-dots { display: flex; gap: 7px; justify-content: center; margin-bottom: 2rem; }
 .pm-dot { width: 10px; height: 10px; border-radius: 3px; }
 
-/* ── Search card ── */
-.pm-search-card {
+/* ── Search card — style the middle Streamlit column as a card ── */
+[data-testid="stHorizontalBlock"]:first-of-type
+    > [data-testid="stColumn"]:nth-child(2)
+    > div:first-child {
     background: #ffffff;
     border: 1.5px solid #d0dae8;
     border-radius: 16px;
     box-shadow: 0 4px 24px rgba(30,106,176,0.10);
-    padding: 2rem 2.5rem 1.5rem;
-    max-width: 860px;
-    margin: 0 auto;
+    padding: 2rem 2.5rem 1.5rem !important;
 }
 
 /* ── Chain pills ── */
@@ -327,8 +327,6 @@ chain = st.session_state["chain"]
 _, card_col, _ = st.columns([1, 10, 1])
 
 with card_col:
-    st.markdown('<div class="pm-search-card">', unsafe_allow_html=True)
-
     # Chain mode buttons
     c_b, c_a, c_p = st.columns(3)
     with c_b:
@@ -450,8 +448,6 @@ with card_col:
 
     run_disabled = not queries or not selected_dbs
     st.button("Search Public Databases", type="primary", disabled=run_disabled, key="v2_run")
-
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ── Database loading ───────────────────────────────────────────────────────────
 
