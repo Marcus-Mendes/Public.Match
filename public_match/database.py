@@ -3,7 +3,7 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Literal
 
-from public_match.parsers import iedb, vdjdb, mcpas, tenx, mixtcrpred, batcave, neotcr
+from public_match.parsers import iedb, vdjdb, mcpas, tenx, mixtcrpred, batcave, neotcr, cedar
 from public_match.parsers import custom as custom_parser
 
 _LOADERS = {
@@ -14,6 +14,7 @@ _LOADERS = {
     "mixtcrpred": mixtcrpred.load,
     "batcave":    batcave.load,
     "neotcr":     neotcr.load,
+    "cedar":      cedar.load,
 }
 
 ALL_DBS = list(_LOADERS.keys())
@@ -26,6 +27,7 @@ _SOURCE_LABELS = {
     "mixtcrpred": "MixTCRpred",
     "batcave":    "BATCAVE",
     "neotcr":     "NeoTCR",
+    "cedar":      "CEDAR",
 }
 
 _AA_PAT    = r"^[ACDEFGHIKLMNPQRSTVWY]+$"
