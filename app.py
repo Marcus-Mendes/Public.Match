@@ -6,7 +6,7 @@ Run from the repo root: streamlit run app.py
 import streamlit as st
 import pandas as pd
 
-from public_match.database import load_databases, ALL_DBS
+from public_match.database import load_databases_cached, build_cache, ALL_DBS, CACHE_PATH
 from public_match.matcher import match
 
 st.set_page_config(page_title="Public.Match", page_icon="🧬", layout="wide")
@@ -84,6 +84,22 @@ with st.sidebar:
         threshold = 1.0
 
     st.divider()
+
+    # Cache status + rebuild
+    cache_exists = CACHE_PATH.exists()
+    if cache_exists:
+        st.success("✓ Database cache ready")
+    else:
+        st.warning("No cache — first load will be slow")
+
+    if st.button("Rebuild database cache", help="Re-run after updating source database files"):
+        with st.spinner("Building cache from source files…"):
+            st.cache_resource.clear()
+            build_cache()
+        st.success("Cache rebuilt!")
+        st.rerun()
+
+    st.divider()
     st.caption("Public.Match · BTC Hackathon 2026")
 
 
@@ -133,7 +149,7 @@ with example_tab:
 
 @st.cache_resource(show_spinner="Loading reference databases…")
 def get_reference(dbs_key: tuple) -> pd.DataFrame:
-    return load_databases(list(dbs_key))
+    return load_databases_cached(list(dbs_key))
 
 
 # ── Run ────────────────────────────────────────────────────────────────────────
