@@ -5,6 +5,7 @@ Run from the repo root: streamlit run app.py
 
 import streamlit as st
 import pandas as pd
+from pathlib import Path
 
 from public_match.database import load_databases_cached, build_cache, ALL_DBS, CACHE_PATH
 from public_match.matcher import match
@@ -106,19 +107,14 @@ _CHAIN_LABELS = {
     "paired": "Paired α + β",
 }
 
-EXAMPLE_BETA = (
-    ">cell_001\nCASSLAPGATNEKLFF\n"
-    ">cell_002\nGILGFVFTL\n"
-    ">cell_003\nCASSLGQTNEKLFF\n"
-    ">cell_004\nCASSPGTGASYEQYF\n"
-    ">cell_005\nCASSFRGGAFF"
-)
+def _read_example(filename: str) -> str:
+    path = Path(filename)
+    return path.read_text().strip() if path.exists() else ""
 
-EXAMPLE_ALPHA = (
-    ">cell_001\nCAVSANSGTYKYIF\n"
-    ">cell_002\nCALSDNNAGKSTF\n"
-    ">cell_003\nCAASNTGKLIF"
-)
+EXAMPLE_BETA         = _read_example("example_input.fasta")
+EXAMPLE_ALPHA        = _read_example("example_input_alpha.fasta")
+EXAMPLE_PAIRED_BETA  = _read_example("example_input_paired_beta.fasta")
+EXAMPLE_PAIRED_ALPHA = _read_example("example_input_paired_alpha.fasta")
 
 # CDR3b and CDR3a column name aliases for TSV auto-detection
 _CDR3B_ALIASES = ["cdr3b", "cdr3_beta", "cdr3_b", "junction_aa", "cdr3", "CDR3", "TRB_CDR3"]
@@ -404,19 +400,20 @@ else:  # paired
                 st.success(msg)
 
     with example_tab:
-        st.markdown("Example TSV with both chains:")
-        st.code(
-            "name\tcdr3b\tcdr3a\n"
-            "cell_001\tCASSLAPGATNEKLFF\tCAVSANSGTYKYIF\n"
-            "cell_002\tCASSLGQTNEKLFF\tCALSDNNAGKSTF",
-            language="text",
-        )
+        st.markdown("Example paired input (alpha + beta, matched by name):")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**CDR3β**")
+            st.code(EXAMPLE_PAIRED_BETA, language="text")
+        with col2:
+            st.markdown("**CDR3α**")
+            st.code(EXAMPLE_PAIRED_ALPHA, language="text")
         if st.button("Load example"):
-            queries = {
-                "cell_001": ("CAVSANSGTYKYI F".replace(" ", ""), "CASSLAPGATNEKLFF"),
-                "cell_002": ("CALSDNNAGKSTF", "CASSLGQTNEKLFF"),
-            }
-            st.success("✓ 2 example paired sequences loaded")
+            beta_seqs  = parse_fasta(EXAMPLE_PAIRED_BETA)
+            alpha_seqs = parse_fasta(EXAMPLE_PAIRED_ALPHA)
+            common = set(beta_seqs) & set(alpha_seqs)
+            queries = {name: (alpha_seqs[name], beta_seqs[name]) for name in sorted(common)}
+            st.success(f"✓ {len(queries)} example paired sequences loaded")
 
 st.divider()
 
