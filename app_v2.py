@@ -59,15 +59,16 @@ _CDR3A_ALIASES = ["cdr3a","cdr3_alpha","cdr3_a","TRA_CDR3","cdr3_TRA","junction_
 _NAME_ALIASES  = ["name","id","cell_id","barcode","clone_id","sample_id"]
 _SOURCE_LABELS = {
     "iedb":"IEDB","vdjdb":"VDJdb","mcpas":"McPAS","tenx":"10xDcode",
-    "mixtcrpred":"MixTCRpred","batcave":"BATCAVE","neotcr":"NeoTCR",
+    "mixtcrpred":"MixTCRpred","batcave":"BATCAVE","neotcr":"NeoTCR","cedar":"CEDAR",
 }
 DB_DISPLAY = {
     "iedb":"IEDB","vdjdb":"VDJdb","mcpas":"McPAS-TCR","tenx":"10x Genomics",
-    "mixtcrpred":"MixTCRpred","batcave":"BATCAVE","neotcr":"NeoTCR",
+    "mixtcrpred":"MixTCRpred","batcave":"BATCAVE","neotcr":"NeoTCR","cedar":"CEDAR",
 }
 SOURCE_COLORS = {
     "IEDB":"#1e6ab0","VDJdb":"#3db5b0","McPAS":"#8b5cf6",
-    "10xDcode":"#f0912a","MixTCRpred":"#d946a8","BATCAVE":"#e84545","NeoTCR":"#2e9e5b",
+    "10xDcode":"#f0912a","MixTCRpred":"#d946a8","BATCAVE":"#e84545",
+    "NeoTCR":"#2e9e5b","CEDAR":"#c0772a",
 }
 
 logo_b64 = _b64("webpage_design/btc_logo.png")
