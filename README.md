@@ -44,6 +44,9 @@ Identifying public TCRs that recognize known epitopes helps distinguish **antige
 | [VDJdb](https://vdjdb.cdr3.net/) | 145,408 chain records | ✓ | ✓ | ✓ | ✓ | `Databases/VDJdb/` |
 | [McPAS-TCR](https://friedmanlab.weizmann.ac.il/McPAS-TCR/) | 40,779 | ✓ | ✓ | ✓ | ✓ | `Databases/McPAS/` |
 | [10x Genomics pMHC](https://www.10xgenomics.com/) | 189,515 cells / 4 donors | ✓ | ✓ | ✓ (55 pMHC) | ✓ | `Databases/10xDcode/` |
+| [MixTCRpred](https://github.com/GfellerLab/MixTCRpred) | 17,715 αβ pairs | ✓ | ✓ | ✓ (146 pMHC) | ✓ | `Databases/MixTCRpred/` |
+| [BATCAVE](https://github.com/meyer-lab-cshl/BATMAN-paper) | 24,875 TCR–peptide measurements | ✓ | ✓ | ✓ (mutational scan) | ✓ | `Databases/BATCAVE/` |
+| [OTS](https://opig.stats.ox.ac.uk/webapps/ots/) | 1.63M non-redundant paired αβ | ✓ | ✓ | — (publicness only) | — | `Databases/OTS/` (manual download) |
 
 ### Unified schema
 
@@ -65,9 +68,10 @@ source        Database of origin (IEDB / VDJdb / McPAS / 10x)
 
 | Database | Entries | Notes |
 |---|---|---|
-| [OTS](https://opig.stats.ox.ac.uk/webapps/ots/) | 5.35M paired αβ | Oxford; quarterly updates; ideal for publicness scoring |
 | [TCRdb 2.0](https://guolab.wchscu.cn/TCRdb2/) | ~700M sequences | Broad clinical coverage; no epitope labels |
 | [STCRDab](http://opig.stats.ox.ac.uk/webapps/stcrdab/) | ~1,000 | 3D structural data from PDB |
+| [PIRD](https://db.cngb.org/pird/) | large | Pan Immune Repertoire Database; China National GeneBank |
+| [ePytope-TCR datasets](https://www.cell.com/cell-genomics/fulltext/S2666-979X(25)00202-2) | 21 datasets / 762 epitopes | 2025 benchmarking collection on Zenodo |
 
 ## Hackathon Deliverable
 

@@ -11,3 +11,9 @@ venv/
 # raw full exports (too large; slim versions committed instead)
 Databases/IEDB/tcell_full_v3.csv
 Databases/IEDB/receptor_full_v3.zip
+# OTS: large per-study files — download manually via bulk_download.sh
+Databases/OTS/*.csv
+Databases/OTS/*.tsv
+Databases/OTS/*.gz
+Databases/OTS/*.fasta
+Databases/OTS/bulk_download.sh
