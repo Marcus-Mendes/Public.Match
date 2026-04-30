@@ -255,9 +255,16 @@ def main():
         chain=args.chain,
     )
 
-    # attach query names
-    seq_to_name = {v: k for k, v in sequences.items()}
-    results.insert(0, "query_name", results.iloc[:, 0].map(seq_to_name))
+    # attach query names back to results
+    if args.chain == "paired":
+        # sequences values are (cdr3a, cdr3b) tuples; match on both query columns
+        pair_to_name = {v: k for k, v in sequences.items()}
+        results.insert(0, "query_name",
+            list(zip(results["query_cdr3a"], results["query_cdr3b"])) )
+        results["query_name"] = results["query_name"].map(pair_to_name)
+    else:
+        seq_to_name = {v: k for k, v in sequences.items()}
+        results.insert(0, "query_name", results.iloc[:, 0].map(seq_to_name))
 
     results.to_csv(args.output, index=False)
     print(f"Done. {len(results)} match(es) written to {args.output}")
