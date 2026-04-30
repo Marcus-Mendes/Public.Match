@@ -5,15 +5,17 @@ NEOTCR_PATH = Path("Databases/NeoTCR/NeoTCR data-20221220.xlsx")
 
 
 def load(path: Path = NEOTCR_PATH) -> pd.DataFrame:
-    df = pd.read_excel(path)
+    df = pd.read_excel(path, sheet_name="All", dtype_backend="numpy_nullable")
+
+    df = df[df["TRB_CDR3"].notna()].copy()
 
     out = pd.DataFrame({
         "cdr3b":    df["TRB_CDR3"].astype(str).str.upper().str.strip(),
         "cdr3a":    df["TRA_CDR3"].astype(str).str.upper().str.strip(),
-        "epitope":  df["Neoepitope"].astype(str).str.strip(),
-        "antigen":  df["Antigen"].astype(str).str.strip(),
-        "pathogen": df["Tumor"].astype(str).str.strip(),
-        "HLA":      df["HLA Allele"].astype(str).str.strip(),
+        "epitope":  df["Neoepitope"].fillna("").astype(str).str.strip(),
+        "antigen":  df["Antigen"].fillna("").astype(str).str.strip(),
+        "pathogen": df["Tumor"].fillna("").astype(str).str.strip(),
+        "HLA":      df["HLA Allele"].fillna("").astype(str).str.strip(),
         "source_db": "NeoTCR",
     })
 
