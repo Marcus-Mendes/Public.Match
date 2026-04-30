@@ -1,0 +1,15 @@
+name: public-match
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.11
+  - pandas
+  - numpy
+  - scipy
+  - biopython
+  - requests
+  - tqdm
+  - parasail  # fast SIMD sequence alignment (BLOSUM62 scoring like TCRMatch)
+  - openpyxl  # required to read IEDB .xlsx receptor export

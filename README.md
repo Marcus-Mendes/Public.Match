@@ -1,6 +1,6 @@
 # Public.Match
 
-**Hackathon Project** | Spatial Immunology & TCR Repertoire Analysis
+**Hackathon Project** | TCR Repertoire Analysis
 
 ---
 
