@@ -8,11 +8,12 @@ def load(path: Path = NEOTCR_PATH) -> pd.DataFrame:
     df = pd.read_excel(path)
 
     out = pd.DataFrame({
-        "cdr3b":     df["TRB_CDR3"].astype(str).str.upper().str.strip(),
-        "epitope":   df["Neoepitope"].astype(str).str.strip(),
-        "antigen":   df["Antigen"].astype(str).str.strip(),
-        "pathogen":  df["Tumor"].astype(str).str.strip(),
-        "HLA":       df["HLA Allele"].astype(str).str.strip(),
+        "cdr3b":    df["TRB_CDR3"].astype(str).str.upper().str.strip(),
+        "cdr3a":    df["TRA_CDR3"].astype(str).str.upper().str.strip(),
+        "epitope":  df["Neoepitope"].astype(str).str.strip(),
+        "antigen":  df["Antigen"].astype(str).str.strip(),
+        "pathogen": df["Tumor"].astype(str).str.strip(),
+        "HLA":      df["HLA Allele"].astype(str).str.strip(),
         "source_db": "NeoTCR",
     })
 

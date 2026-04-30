@@ -2,6 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 _CDR3B_ALIASES = ["cdr3b", "cdr3_beta", "cdr3_b", "junction_aa", "cdr3", "CDR3", "sequence", "seq"]
+_CDR3A_ALIASES = ["cdr3a", "cdr3_alpha", "cdr3_a", "junction_aa_alpha", "TRA_CDR3", "cdr3_TRA"]
 
 _COL_ALIASES = {
     "epitope":  ["epitope", "peptide", "antigen_peptide"],
@@ -45,8 +46,11 @@ def load(path: Path, cdr3_col: str = None, source_name: str = None) -> pd.DataFr
             f"Use --custom-db-cdr3-col to specify the column name."
         )
 
+    cdr3a_col = _find_col(df.columns, _CDR3A_ALIASES)
+
     out = pd.DataFrame({
-        "cdr3b":     df[cdr3b_col].astype(str).str.upper().str.strip(),
+        "cdr3b":    df[cdr3b_col].astype(str).str.upper().str.strip(),
+        "cdr3a":    df[cdr3a_col].astype(str).str.upper().str.strip() if cdr3a_col else pd.NA,
         "source_db": source_name,
     })
 

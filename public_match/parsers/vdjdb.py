@@ -16,11 +16,12 @@ def load(path: Path = VDJDB_PATH, min_score: int = 1) -> pd.DataFrame:
     df = df[df["Score"].fillna(0).astype(int) >= min_score]
 
     out = pd.DataFrame({
-        "cdr3b": df["CDR3"].str.upper().str.strip(),
-        "epitope": df["Epitope"].str.strip(),
-        "antigen": df["Epitope gene"].str.strip(),
+        "cdr3b":    df["CDR3"].str.upper().str.strip(),
+        "cdr3a":    pd.NA,  # slim format is TRB-only; no alpha chain available
+        "epitope":  df["Epitope"].str.strip(),
+        "antigen":  df["Epitope gene"].str.strip(),
         "pathogen": df["Epitope species"].str.strip(),
-        "HLA": df["MHC A"].str.strip(),
+        "HLA":      df["MHC A"].str.strip(),
         "source_db": "VDJdb",
     })
 

@@ -19,11 +19,12 @@ def _load_file(path: Path, activity_threshold: float) -> pd.DataFrame:
     df = df[df["cdr3b"].notna()].copy()
 
     return pd.DataFrame({
-        "cdr3b": df["cdr3b"].str.upper().str.strip(),
-        "epitope": df["index_peptide"].str.strip(),
-        "antigen": df["peptide_type"].str.strip(),
+        "cdr3b":    df["cdr3b"].str.upper().str.strip(),
+        "cdr3a":    df["cdr3a"].astype(str).str.upper().str.strip(),
+        "epitope":  df["index_peptide"].str.strip(),
+        "antigen":  df["peptide_type"].str.strip(),
         "pathogen": df["peptide_type"].str.strip(),
-        "HLA": df["mhc"].str.strip(),
+        "HLA":      df["mhc"].str.strip(),
         "source_db": "BATCAVE",
     })
 

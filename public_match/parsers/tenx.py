@@ -8,11 +8,12 @@ def load(path: Path = TENX_PATH) -> pd.DataFrame:
     df = pd.read_csv(path)
 
     out = pd.DataFrame({
-        "cdr3b": df["cdr3b"].str.upper().str.strip(),
-        "epitope": df["epitope"].str.strip(),
-        "antigen": df["antigen"].str.strip(),
+        "cdr3b":    df["cdr3b"].str.upper().str.strip(),
+        "cdr3a":    df["cdr3a"].astype(str).str.upper().str.strip(),
+        "epitope":  df["epitope"].str.strip(),
+        "antigen":  df["antigen"].str.strip(),
         "pathogen": df["pathogen"].str.strip(),
-        "HLA": df["HLA"].str.strip(),
+        "HLA":      df["HLA"].str.strip(),
         "source_db": "10xDcode",
     })
 

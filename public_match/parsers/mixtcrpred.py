@@ -11,11 +11,12 @@ def load(path: Path = MIXTCRPRED_PATH) -> pd.DataFrame:
     df = df[df["cdr3_TRB"].notna()].copy()
 
     out = pd.DataFrame({
-        "cdr3b": df["cdr3_TRB"].str.upper().str.strip(),
-        "epitope": df["epitope"].str.strip(),
-        "antigen": df["epitope"].str.strip(),  # no separate antigen gene column
+        "cdr3b":    df["cdr3_TRB"].str.upper().str.strip(),
+        "cdr3a":    df["cdr3_TRA"].astype(str).str.upper().str.strip(),
+        "epitope":  df["epitope"].str.strip(),
+        "antigen":  df["epitope"].str.strip(),  # no separate antigen gene column
         "pathogen": pd.Series([""] * len(df), index=df.index),
-        "HLA": df["MHC"].str.strip(),
+        "HLA":      df["MHC"].str.strip(),
         "source_db": "MixTCRpred",
     })
 

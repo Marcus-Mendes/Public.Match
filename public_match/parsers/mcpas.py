@@ -11,11 +11,12 @@ def load(path: Path = MCPAS_PATH) -> pd.DataFrame:
     df = df[df["CDR3.beta.aa"].notna()].copy()
 
     out = pd.DataFrame({
-        "cdr3b": df["CDR3.beta.aa"].str.upper().str.strip(),
-        "epitope": df["Epitope.peptide"].fillna("").str.strip(),
-        "antigen": df["Antigen.protein"].fillna("").str.strip(),
+        "cdr3b":    df["CDR3.beta.aa"].str.upper().str.strip(),
+        "cdr3a":    df["CDR3.alpha.aa"].astype(str).str.upper().str.strip(),
+        "epitope":  df["Epitope.peptide"].fillna("").str.strip(),
+        "antigen":  df["Antigen.protein"].fillna("").str.strip(),
         "pathogen": df["Pathology"].fillna("").str.strip(),
-        "HLA": df["MHC"].fillna("").str.strip(),
+        "HLA":      df["MHC"].fillna("").str.strip(),
         "source_db": "McPAS",
     })
 
