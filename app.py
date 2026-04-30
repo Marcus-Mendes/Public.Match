@@ -20,6 +20,15 @@ DB_LABELS = {
     "batcave": "BATCAVE",
 }
 
+_SOURCE_LABELS = {
+    "iedb": "IEDB",
+    "vdjdb": "VDJdb",
+    "mcpas": "McPAS",
+    "tenx": "10xDcode",
+    "mixtcrpred": "MixTCRpred",
+    "batcave": "BATCAVE",
+}
+
 EXAMPLE_FASTA = (
     ">cell_001\nCASSLAPGATNEKLFF\n"
     ">cell_002\nGILGFVFTL\n"
@@ -85,14 +94,8 @@ with st.sidebar:
 
     st.divider()
 
-    # Cache status + rebuild
-    cache_exists = CACHE_PATH.exists()
-    if cache_exists:
-        st.success("✓ Database cache ready")
-    else:
-        st.warning("No cache — first load will be slow")
-
-    if st.button("Rebuild database cache", help="Re-run after updating source database files"):
+    if st.button("Rebuild database cache",
+                 help="Re-run after updating source database files"):
         with st.spinner("Building cache from source files…"):
             st.cache_resource.clear()
             build_cache()
@@ -110,6 +113,44 @@ st.markdown(
     "Match patient CDR3β sequences against public TCR databases — "
     "IEDB, VDJdb, McPAS-TCR, 10x Genomics, MixTCRpred, and BATCAVE — in one query."
 )
+
+st.divider()
+
+
+# ── Eager database load ────────────────────────────────────────────────────────
+
+@st.cache_resource
+def get_all_reference() -> pd.DataFrame:
+    return load_databases_cached(ALL_DBS)
+
+
+status = st.empty()
+
+if not CACHE_PATH.exists():
+    status.info(
+        "⏳ First launch — building database cache from source files. "
+        "This takes 1–2 minutes and only happens once."
+    )
+
+with st.spinner("Loading reference databases…"):
+    all_reference = get_all_reference()
+
+db_counts = all_reference["source_db"].value_counts()
+status.success(
+    f"✓ **{len(all_reference):,} reference entries** loaded across "
+    f"**{db_counts.shape[0]} databases** — "
+    + "  |  ".join(f"{k}: {v:,}" for k, v in db_counts.items())
+)
+
+# Filter to user-selected databases
+if set(selected_dbs) == set(ALL_DBS):
+    reference = all_reference
+else:
+    labels = [_SOURCE_LABELS[d] for d in selected_dbs]
+    reference = all_reference[all_reference["source_db"].isin(labels)].reset_index(drop=True)
+
+st.divider()
+
 
 # ── Input ──────────────────────────────────────────────────────────────────────
 
@@ -144,17 +185,10 @@ with example_tab:
         sequences = parse_fasta(EXAMPLE_FASTA)
         st.success(f"✓ {len(sequences)} example sequences loaded")
 
-
-# ── Database loader (cached) ───────────────────────────────────────────────────
-
-@st.cache_resource(show_spinner="Loading reference databases…")
-def get_reference(dbs_key: tuple) -> pd.DataFrame:
-    return load_databases_cached(list(dbs_key))
+st.divider()
 
 
 # ── Run ────────────────────────────────────────────────────────────────────────
-
-st.divider()
 
 run_disabled = not sequences or not selected_dbs
 st.button("▶  Run Public.Match", type="primary", disabled=run_disabled, key="run_btn")
@@ -163,8 +197,6 @@ if not sequences:
     st.info("Upload or paste CDR3β sequences above to get started.")
 
 if st.session_state.get("run_btn"):
-    reference = get_reference(tuple(sorted(selected_dbs)))
-
     with st.spinner(f"Matching {len(sequences)} sequence(s) against {len(reference):,} reference entries…"):
         results = match(
             queries=list(sequences.values()),
@@ -194,13 +226,13 @@ if st.session_state.get("run_btn"):
         c4.metric("Databases with hits", results["source_db"].nunique())
 
         st.markdown("**Hits by database**")
-        db_counts = (
+        db_hit_counts = (
             results["source_db"]
             .value_counts()
             .rename_axis("Database")
             .reset_index(name="Hits")
         )
-        st.bar_chart(db_counts.set_index("Database"))
+        st.bar_chart(db_hit_counts.set_index("Database"))
 
         st.markdown("**All matches**")
         st.dataframe(results, use_container_width=True, height=420)
