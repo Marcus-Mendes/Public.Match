@@ -104,11 +104,16 @@ section[data-testid="stVerticalBlock"] > div { gap: 0 !important; }
     border-bottom: 1px solid #e8edf2;
     padding: 0 3rem;
     display: flex; align-items: center; justify-content: space-between;
-    height: 64px;
+    height: 76px;
     box-shadow: 0 1px 6px rgba(0,0,0,0.06);
 }
-.pm-nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-.pm-nav-brand span { font-size: 1.2rem; font-weight: 700; color: #0b1f3a; letter-spacing: -0.3px; }
+.pm-nav-brand { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+.pm-nav-brand .pm-brand-text {
+    font-size: 1.65rem; font-weight: 700; letter-spacing: -0.5px;
+    font-style: italic; line-height: 1;
+}
+.pm-brand-public { color: #1e6ab0; }
+.pm-brand-match  { color: #4a5568; }
 .pm-nav-links { display: flex; gap: 2rem; }
 .pm-nav-links a {
     color: #4a5568; font-size: 0.9rem; font-weight: 500;
@@ -252,14 +257,16 @@ hr { border-color: #e8edf2 !important; margin: 0 !important; }
 # ── Navigation ─────────────────────────────────────────────────────────────────
 
 logo_html = (
-    f'<img src="data:image/png;base64,{logo_b64}" height="36" style="margin-right:4px;">'
+    f'<img src="data:image/png;base64,{logo_b64}" height="52" style="display:block;">'
     if logo_b64 else '🧬'
 )
 st.markdown(f"""
 <div class="pm-nav">
     <div class="pm-nav-brand">
         {logo_html}
-        <span>Public.Match</span>
+        <span class="pm-brand-text">
+            <span class="pm-brand-public">Public</span><span class="pm-brand-match">.Match</span>
+        </span>
     </div>
     <div class="pm-nav-links">
         <a href="#">About</a>
@@ -314,19 +321,7 @@ _, card_col, _ = st.columns([1, 10, 1])
 with card_col:
     st.markdown('<div class="pm-search-card">', unsafe_allow_html=True)
 
-    # Chain mode pills
-    st.markdown("""
-    <div class="pm-chain-row">
-        <div class="pm-chain-pill {b}" id="pill-beta" onclick="">CDR3β only</div>
-        <div class="pm-chain-pill {a}" id="pill-alpha">CDR3α only</div>
-        <div class="pm-chain-pill {p}" id="pill-paired">Paired α + β</div>
-    </div>
-    """.format(
-        b="active" if chain == "beta" else "",
-        a="active" if chain == "alpha" else "",
-        p="active" if chain == "paired" else "",
-    ), unsafe_allow_html=True)
-
+    # Chain mode buttons
     c_b, c_a, c_p = st.columns(3)
     with c_b:
         if st.button("CDR3β only", key="chain_beta",
