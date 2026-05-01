@@ -273,12 +273,31 @@ st.markdown(f"""
         </span>
     </div>
     <div class="pm-nav-links">
-        <a href="#">About</a>
-        <a href="#">Databases</a>
+        <a href="." >Home</a>
+        <a href="?page=about">About</a>
+        <a href="?page=databases">Databases</a>
         <a href="https://github.com/Marcus-Mendes/Public.Match" target="_blank">GitHub</a>
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+# ── Page routing ───────────────────────────────────────────────────────────────
+
+_page = st.query_params.get("page", "home")
+
+if _page == "about":
+    readme = Path("README.md").read_text() if Path("README.md").exists() else "_README.md not found._"
+    st.markdown('<div style="max-width:860px;margin:3rem auto;padding:0 2rem 4rem;">', unsafe_allow_html=True)
+    st.markdown(readme)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.stop()
+
+if _page == "databases":
+    dbmd = Path("DATABASES.md").read_text() if Path("DATABASES.md").exists() else "_DATABASES.md not found._"
+    st.markdown('<div style="max-width:860px;margin:3rem auto;padding:0 2rem 4rem;">', unsafe_allow_html=True)
+    st.markdown(dbmd)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.stop()
 
 # ── Hero ───────────────────────────────────────────────────────────────────────
 
@@ -561,8 +580,6 @@ if st.session_state.get("v2_run") and queries:
             file_name="public_match_results.csv",
             mime="text/csv",
         )
-
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ── Footer ─────────────────────────────────────────────────────────────────────
 
