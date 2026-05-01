@@ -569,6 +569,27 @@ def _badge(source):
     col = SOURCE_COLORS.get(source, "#888")
     return f'<span class="db-badge" style="background:{col}">{source}</span>'
 
+
+def _make_aggregate(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
+    """
+    Collapse full results to unique CDR3/epitope pairs.
+    Adds db_count (number of distinct databases) and databases (comma-separated list).
+    group_cols should not include source_db or score.
+    """
+    valid_cols = [c for c in group_cols if c in df.columns]
+    return (
+        df.groupby(valid_cols, dropna=False)
+        .agg(
+            db_count=("source_db", "nunique"),
+            databases=("source_db", lambda x: ", ".join(sorted(x.dropna().unique()))),
+            max_score=("score", "max"),
+        )
+        .reset_index()
+        .sort_values("db_count", ascending=False)
+        .reset_index(drop=True)
+    )
+
+
 TABLE_CSS = """<style>
 .pm-table { width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:0.5rem; }
 .pm-table th { background:#f0f4ff; color:#1a2f4e; font-weight:600; padding:8px 12px;
@@ -632,12 +653,30 @@ if st.session_state.get("v3_run"):
                 st.markdown(TABLE_CSS, unsafe_allow_html=True)
 
                 st.markdown("<br>", unsafe_allow_html=True)
-                st.download_button(
-                    "⬇  Download results CSV",
-                    data=results.to_csv(index=False),
-                    file_name="public_match_cdr3_results.csv",
-                    mime="text/csv",
-                )
+                dl1, dl2 = st.columns(2)
+                with dl1:
+                    st.download_button(
+                        "⬇  Download full results CSV",
+                        data=results.to_csv(index=False),
+                        file_name="public_match_cdr3_results.csv",
+                        mime="text/csv",
+                        key="v3_dl_cdr3_full",
+                    )
+                with dl2:
+                    if chain == "alpha":
+                        agg_cols = ["query_name", "query_cdr3a", "cdr3a", "epitope"]
+                    elif chain == "paired":
+                        agg_cols = ["query_name", "query_cdr3a", "query_cdr3b", "cdr3a", "cdr3b", "epitope"]
+                    else:
+                        agg_cols = ["query_name", "query_cdr3b", "cdr3b", "epitope"]
+                    agg_df = _make_aggregate(results, agg_cols)
+                    st.download_button(
+                        "⬇  Download aggregate CSV",
+                        data=agg_df.to_csv(index=False),
+                        file_name="public_match_cdr3_aggregate.csv",
+                        mime="text/csv",
+                        key="v3_dl_cdr3_agg",
+                    )
 
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -678,12 +717,24 @@ if st.session_state.get("v3_run"):
                 st.markdown(TABLE_CSS, unsafe_allow_html=True)
 
                 st.markdown("<br>", unsafe_allow_html=True)
-                st.download_button(
-                    "⬇  Download results CSV",
-                    data=results.to_csv(index=False),
-                    file_name="public_match_epitope_results.csv",
-                    mime="text/csv",
-                )
+                dl1, dl2 = st.columns(2)
+                with dl1:
+                    st.download_button(
+                        "⬇  Download full results CSV",
+                        data=results.to_csv(index=False),
+                        file_name="public_match_epitope_results.csv",
+                        mime="text/csv",
+                        key="v3_dl_epi_full",
+                    )
+                with dl2:
+                    agg_df = _make_aggregate(results, ["query_epitope", "epitope", "cdr3a", "cdr3b"])
+                    st.download_button(
+                        "⬇  Download aggregate CSV",
+                        data=agg_df.to_csv(index=False),
+                        file_name="public_match_epitope_aggregate.csv",
+                        mime="text/csv",
+                        key="v3_dl_epi_agg",
+                    )
 
             st.markdown('</div>', unsafe_allow_html=True)
 
