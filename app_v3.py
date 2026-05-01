@@ -4,6 +4,7 @@ Run from repo root: streamlit run app_v3.py --server.port 8503
 """
 
 import base64
+import tempfile
 import streamlit as st
 import pandas as pd
 from pathlib import Path
@@ -11,6 +12,7 @@ from pathlib import Path
 from public_match.database import load_databases_cached, ALL_DBS
 from public_match.matcher import match
 from public_match.epitope_matcher import match_by_epitope
+from public_match.parsers import custom as custom_parser
 
 st.set_page_config(
     page_title="Public.Match",
@@ -500,6 +502,37 @@ with card_col:
                 selected_dbs.append(db)
     st.session_state["selected_dbs"] = selected_dbs
 
+    # Custom database (optional)
+    with st.expander("＋ Add a custom database (optional)"):
+        st.markdown(
+            "<p style='font-size:0.85rem;color:#5a6a7e;margin:0 0 8px;'>"
+            "Upload a CSV or TSV file. CDR3β/α columns are auto-detected from common names "
+            "(cdr3b, cdr3_beta, junction_aa, cdr3a, etc.). "
+            "Use the hint below only if auto-detection fails.</p>",
+            unsafe_allow_html=True,
+        )
+        custom_uploads = st.file_uploader(
+            "Custom database file(s)",
+            type=["csv", "tsv", "txt"],
+            accept_multiple_files=True,
+            key="v3_custom_db",
+            label_visibility="collapsed",
+        )
+        hint_col, only_col = st.columns([2, 1])
+        with hint_col:
+            custom_cdr3_hint = st.text_input(
+                "CDR3β column name hint",
+                placeholder="e.g. my_cdr3_column  (leave blank for auto)",
+                key="v3_custom_cdr3_col",
+                label_visibility="collapsed",
+            )
+        with only_col:
+            custom_only = st.checkbox(
+                "Custom database only",
+                help="Skip all built-in databases and search only your uploaded file(s).",
+                key="v3_custom_only",
+            )
+
     st.divider()
 
     # Method + threshold (shared by both modes)
@@ -517,12 +550,16 @@ with card_col:
             threshold = 1.0
             st.markdown("<br>", unsafe_allow_html=True)
 
+    custom_uploads = st.session_state.get("v3_custom_db") or []
+    custom_only    = st.session_state.get("v3_custom_only", False)
+    has_db         = bool(selected_dbs) or bool(custom_uploads)
+
     if search_mode == "cdr3":
         queries = st.session_state.get("queries", {})
-        run_disabled = not queries or not selected_dbs
+        run_disabled = not queries or not has_db
     else:
         epitope_queries = st.session_state.get("epitope_queries", [])
-        run_disabled = not epitope_queries or not selected_dbs
+        run_disabled = not epitope_queries or not has_db
 
     st.button("Search Public Databases", type="primary", disabled=run_disabled, key="v3_run")
 
@@ -556,12 +593,37 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Filter to selected dbs
-if set(selected_dbs) != set(ALL_DBS):
+# Build reference from built-in DBs (skip if custom-only)
+custom_uploads  = st.session_state.get("v3_custom_db") or []
+custom_only     = st.session_state.get("v3_custom_only", False)
+custom_cdr3_hint = st.session_state.get("v3_custom_cdr3_col", "")
+
+if custom_only:
+    reference = pd.DataFrame(columns=all_ref.columns)
+elif set(selected_dbs) != set(ALL_DBS):
     labels = [_SOURCE_LABELS[d] for d in selected_dbs]
     reference = all_ref[all_ref["source_db"].isin(labels)].reset_index(drop=True)
 else:
     reference = all_ref
+
+# Load and append custom database files
+_ref_chain_for_custom = chain if search_mode == "cdr3" else "beta"
+custom_load_errors = []
+if custom_uploads:
+    custom_frames = []
+    for uf in custom_uploads:
+        try:
+            cdf = _load_custom_upload(uf, cdr3_hint=custom_cdr3_hint)
+            cdf = _apply_chain_filter(cdf, _ref_chain_for_custom)
+            custom_frames.append(cdf)
+        except Exception as exc:
+            custom_load_errors.append(f"{uf.name}: {exc}")
+    if custom_frames:
+        custom_combined = pd.concat(custom_frames, ignore_index=True)
+        reference = pd.concat([reference, custom_combined], ignore_index=True)
+
+for err in custom_load_errors:
+    st.warning(f"⚠️ Could not load custom DB — {err}")
 
 # ── Run matching ───────────────────────────────────────────────────────────────
 
@@ -588,6 +650,33 @@ def _make_aggregate(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
         .sort_values("db_count", ascending=False)
         .reset_index(drop=True)
     )
+
+
+_AA_PAT = r"^[ACDEFGHIKLMNPQRSTVWY]+$"
+
+def _load_custom_upload(uploaded_file, cdr3_hint: str = "") -> pd.DataFrame:
+    """Write an uploaded file to a temp path and parse it via custom_parser.load()."""
+    suffix = Path(uploaded_file.name).suffix.lower() or ".csv"
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+        tmp.write(uploaded_file.read())
+        tmp_path = Path(tmp.name)
+    try:
+        return custom_parser.load(
+            tmp_path,
+            cdr3_col=cdr3_hint.strip() or None,
+            source_name=Path(uploaded_file.name).stem,
+        )
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+
+def _apply_chain_filter(df: pd.DataFrame, chain: str) -> pd.DataFrame:
+    """Apply the same CDR3 chain filter used by load_databases()."""
+    if chain in ("beta", "paired"):
+        df = df[df["cdr3b"].str.match(_AA_PAT, na=False) & (df["cdr3b"].str.len() >= 8)]
+    if chain in ("alpha", "paired"):
+        df = df[df["cdr3a"].notna() & (df["cdr3a"].str.len() >= 8)]
+    return df.reset_index(drop=True)
 
 
 TABLE_CSS = """<style>
